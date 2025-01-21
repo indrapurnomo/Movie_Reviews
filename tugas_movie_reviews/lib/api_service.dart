@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String baseUrl =
-      'https://crudcrud.com/api/a6bbc3a2daee4b188f4ea77e8bed07';
-
+      'https://crudcrud.com/api/a6bbc3a2daee4b188f4ea77e8bed07bf';
+// ganti url api
   Future<bool> registerUser(String username, String password) async {
     try {
       final response = await http.post(
@@ -82,14 +82,16 @@ class ApiService {
     }
   }
 
-  Future<bool> updateReview(String id, String username, String title, int rating, String comment, String imageUrl, int likes) async {
+  Future<bool> updateReview(String id, String username, String title,
+      int rating, String comment, String imageUrl, int likes) async {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/reviews/$id'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          //tambah username
           'username': username,
-		  'title': title,
+          'title': title,
           'rating': rating,
           'comment': comment,
           'imageUrl': imageUrl,
@@ -115,89 +117,35 @@ class ApiService {
     }
   }
 
-//   Future<bool> likeReview(String reviewId) async {
-//   try {
-//     // Ambil data review dari server
-//     final response = await http.get(Uri.parse('$baseUrl/reviews/$reviewId'));
-//     if (response.statusCode == 200) {
-//       final review = jsonDecode(response.body);
+  Future<int?> likeReview(String reviewId) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/reviews/$reviewId'));
+      if (response.statusCode == 200) {
+        final review = jsonDecode(response.body);
 
-//       // Tambah 1 pada likes
-//       final newLikes = (review['likes'] ?? 0) + 1;
+        final newLikes = (review['likes'] ?? 0) + 1;
 
-//       // Kirim semua data yang ada (pastikan semua properti tetap)
-//       final updateResponse = await http.put(
-//         Uri.parse('$baseUrl/reviews/$reviewId'),
-//         headers: {'Content-Type': 'application/json'},
-//         body: jsonEncode({
-//           'username': review['username'], // Pertahankan username
-//           'title': review['title'],      // Pertahankan judul
-//           'rating': review['rating'],    // Pertahankan rating
-//           'comment': review['comment'],  // Pertahankan komentar
-//           'imageUrl': review['imageUrl'], // Pertahankan URL gambar
-//           'likes': newLikes,             // Update likes
-//         }),
-//       );
-//       return updateResponse.statusCode == 200;
-//     }
-//     return false;
-//   } catch (e) {
-//     print('Error liking review: $e');
-//     return false;
-//   }
-// }
- Future<bool> likeReview(String reviewId) async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/reviews/$reviewId'));
-    if (response.statusCode == 200) {
-      final review = jsonDecode(response.body);
+        final updateResponse = await http.put(
+          Uri.parse('$baseUrl/reviews/$reviewId'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'username': review['username'],
+            'title': review['title'],
+            'rating': review['rating'],
+            'comment': review['comment'],
+            'imageUrl': review['imageUrl'],
+            'likes': newLikes,
+          }),
+        );
 
- // Pastikan review memiliki data yang diperlukan
-      if (review == null || review['_id'] == null) {
-        print('Error: Review data is invalid.');
-        return false;
+        if (updateResponse.statusCode == 200) {
+          return newLikes; // Kembalikan jumlah likes terbaru
+        }
       }
-
-      final newLikes = (review['likes'] ?? 0) + 1;
-
-      final updateResponse = await http.put(
-        Uri.parse('$baseUrl/reviews/$reviewId'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          '_id': review['_id'],
-          'username': review['username'],
-          'title': review['title'],
-          'rating': review['rating'],
-          'comment': review['comment'],
-          'imageUrl': review['imageUrl'],
-          'likes': newLikes,
-        }),
-      );
-
-      print('Update Response Status Code: ${updateResponse.statusCode}');
-      print('Update Response Body: ${updateResponse.body}');
-
-      return updateResponse.statusCode == 200;
-    } else {
-      print('Failed to fetch review with ID: $reviewId');
-      return false;
+      return null;
+    } catch (e) {
+      print('Error liking review: $e');
+      return null;
     }
-  } catch (e) {
-    print('Error liking review: $e');
-    return false;
   }
 }
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-

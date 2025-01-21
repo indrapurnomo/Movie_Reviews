@@ -47,22 +47,6 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
     }
   }
 
-// void _likeReview(String id, int likes) async {
-//   try {
-//     final updatedLikes = likes + 1;
-//     final success = await _apiService.updateReview(id, '', '', 0, '', '', updatedLikes);
-
-//     if (success) {
-//       _loadReviews();
-//     } else {
-//       _showErrorSnackBar('Gagal memberi like pada review');
-//     }
-//   } catch (e) {
-//     debugPrint('Error updating likes: $e');
-//     _showErrorSnackBar('Terjadi kesalahan. Coba lagi nanti.');
-//   }
-// }
-
   void _showErrorSnackBar(String message) {
     if (ScaffoldMessenger.maybeOf(context) != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,6 +106,43 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      //tampilkan jumlah like
+                      Text(
+                          '${review['likes'] ?? 0}'), // Menampilkan jumlah likes
+                      // tombol like
+                      IconButton(
+                        icon: const Icon(Icons.thumb_up),
+                        onPressed: () async {
+                          final reviewId = review["_id"];
+                          if (reviewId == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('ID ulasan tidak valid')),
+                            );
+                            return;
+                          }
+
+                          final newLikes =
+                              await _apiService.likeReview(reviewId);
+
+                          if (newLikes != null) {
+                            setState(() {
+                              _reviews[index]['likes'] =
+                                  newLikes; // Update jumlah likes di UI
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Berhasil memberi like')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Gagal memberi like pada review')),
+                            );
+                          }
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () async {
@@ -141,40 +162,6 @@ class _MovieReviewsScreenState extends State<MovieReviewsScreen> {
                         icon: const Icon(Icons.delete),
                         onPressed: () => _deleteReview(review['_id']),
                       ),
-             
-                     
-                     
-                     IconButton(
-  icon: Icon(Icons.thumb_up),
-  onPressed: () async {
-    final reviewId = widget.review?["_id"];
-    if (reviewId == null) {
-      print('Error: Review ID is null. Cannot like the review.');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID ulasan tidak valid')),
-      );
-      return;
-    }
-
-    print('Attempting to like review with ID: $reviewId');
-    final success = await _apiService.likeReview(reviewId);
-
-    if (success) {
-      print('Like successful for review ID: $reviewId');
-      setState(() {
-        widget.review!['likes'] += 1; // Update jumlah like di UI
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Berhasil memberi like')),
-      );
-    } else {
-      print('Failed to like review with ID: $reviewId');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memberi like pada review')),
-      );
-    }
-  },
-)
                     ],
                   ),
                 );
