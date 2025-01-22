@@ -4,6 +4,7 @@ import 'movie_reviews_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+ //add  const
   const LoginScreen({super.key});
 
   @override
